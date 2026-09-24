@@ -1,21 +1,18 @@
-# Database Design
+# Database
 
-MySQL is the source of truth for account and trading state.
-
-## Tables
+Core tables:
 
 - users
+- refresh_tokens
 - assets
 - markets
 - accounts
 - orders
 - trades
 - transactions
-- refresh_tokens
 - portfolio_snapshots
+- idempotency_keys
 
-Money, price and quantity fields use fixed-point DECIMAL values.
+Financial values use DECIMAL(36,18). Account uniqueness is enforced by (user_id, asset_id).
 
-Balance-changing operations run inside database transactions. Relevant account rows are locked before balance checks and updates so concurrent requests cannot overspend an account.
-
-The transactions table records balance-changing events with before/after balances and optional order/trade references.
+Migration 0001 creates the core schema. Migration 0002 adds idempotency storage and seeds USDT, BTC, ETH, SOL plus BTC/USDT, ETH/USDT and SOL/USDT.

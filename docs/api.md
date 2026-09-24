@@ -3,41 +3,37 @@
 Base path: /api/v1
 
 ## Auth
-
-POST /auth/register
-POST /auth/login
-POST /auth/refresh
-POST /auth/logout
+- POST /auth/register
+- POST /auth/login
+- POST /auth/refresh
+- POST /auth/logout
 
 ## Markets
-
-GET /markets
-GET /markets/{symbol}
+- GET /markets
+- GET /markets/{symbol}
 
 ## Account and portfolio
-
-GET /account
-GET /portfolio
+- GET /account
+- GET /portfolio
 
 ## Orders
+- GET /orders
+- GET /orders/{id}
+- POST /orders
+- DELETE /orders/{id}
 
-GET /orders
-POST /orders
-GET /orders/{id}
-DELETE /orders/{id}
-
-Order creation requires an Idempotency-Key header.
+POST /orders requires an Idempotency-Key header.
 
 ## Trades
+- GET /trades
 
-GET /trades
+## Order example
 
-## Error format
+    {
+      "market": "BTC/USDT",
+      "side": "BUY",
+      "type": "MARKET",
+      "quantity": "0.001"
+    }
 
-{
-  "error": {
-    "code": "INSUFFICIENT_BALANCE",
-    "message": "Insufficient USDT balance.",
-    "details": {}
-  }
-}
+The MVP uses FastAPI's standard HTTP error detail and stable HTTP status codes.
