@@ -1,25 +1,13 @@
 # Order State Machine
 
-## States
+PENDING -> OPEN
+PENDING -> FILLED
+PENDING -> REJECTED
+OPEN -> FILLED
+OPEN -> CANCELLED
+PARTIALLY_FILLED -> FILLED
+PARTIALLY_FILLED -> CANCELLED
 
-- PENDING
-- OPEN
-- PARTIALLY_FILLED
-- FILLED
-- CANCELLED
-- REJECTED
+Terminal states are FILLED, CANCELLED and REJECTED.
 
-## Allowed transitions
-
-- PENDING → OPEN
-- PENDING → FILLED
-- PENDING → REJECTED
-- OPEN → PARTIALLY_FILLED
-- OPEN → FILLED
-- OPEN → CANCELLED
-- PARTIALLY_FILLED → FILLED
-- PARTIALLY_FILLED → CANCELLED
-
-Terminal states cannot transition back to active states.
-
-Only OPEN and PARTIALLY_FILLED orders can be cancelled. Cancellation releases only the remaining reservation for a partially filled order.
+The MVP executes orders atomically, so PARTIALLY_FILLED is reserved for future incremental execution support.

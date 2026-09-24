@@ -2,77 +2,92 @@
 
 TradeFlow is a full-stack paper-trading and portfolio management platform built as a portfolio-grade engineering project.
 
-> **Scope:** TradeFlow does not execute real-money trades or custody user funds.
+> Scope: paper trading only. No real-money execution or custody.
 
-## Current status
+## Status
 
-**Active development — foundation and database layer implemented.**
+**MVP implemented.**
 
-The repository currently contains:
+The repository contains the backend trading/accounting flow, seeded markets, JWT authentication with rotating refresh tokens, Redis caching/rate limiting, a React dashboard, Docker Compose, Alembic migrations, tests and CI.
 
-- FastAPI backend foundation
-- MySQL + SQLAlchemy + Alembic database layer
-- Redis service in local Docker Compose
-- JWT/password-security primitives
-- Initial database models and migration
-- React + TypeScript + Vite frontend foundation
-- Pytest coverage for health and password hashing
-- GitHub Actions CI for backend and frontend builds
-- Architecture and API documentation
+## Features
 
-Trading execution, market-data providers, portfolio accounting, refresh-token rotation, rate limiting, and the production dashboard are being implemented in subsequent phases.
+- FastAPI + SQLAlchemy + MySQL
+- JWT access tokens and hashed rotating refresh tokens
+- 10,000 USDT paper balance on registration
+- BTC/USDT, ETH/USDT and SOL/USDT seeded markets
+- Market orders and crossing/non-crossing limit orders
+- Balance reservation and release
+- Row locking for financial account mutations
+- Idempotent order creation
+- Trade records and transaction ledger
+- Portfolio valuation and basic PnL
+- Redis price caching and authentication rate limiting
+- React + TypeScript dashboard
+- Docker Compose and Alembic
+- Pytest and GitHub Actions CI
+
+## Paper execution model
+
+TradeFlow deliberately does not implement a full exchange matching engine. It uses deterministic paper prices for supported markets.
+
+- Market orders fill immediately.
+- A limit BUY fills when its price is at or above the current paper price.
+- A limit SELL fills when its price is at or below the current paper price.
+- Otherwise the limit order remains OPEN until cancelled.
+
+A future market-data worker/provider can replace the deterministic provider without changing the accounting boundaries.
 
 ## Architecture
 
-React/TypeScript frontend → FastAPI API → service layer → SQLAlchemy → MySQL
+React/TypeScript -> FastAPI -> application services -> SQLAlchemy -> MySQL
+                                                   -> Redis
 
-Redis is reserved for cache/rate-limiting concerns. Financial state is persisted in MySQL using fixed-point DECIMAL values and transactional updates.
+MySQL is authoritative for financial state. Redis is only a cache/rate-limit dependency.
 
-See:
+## Local setup
 
-- docs/architecture.md
-- docs/database.md
-- docs/order-state-machine.md
-- docs/api.md
-- docs/development.md
+1. Copy .env.example to .env.
+2. Set a strong SECRET_KEY.
+3. Start the backend infrastructure:
 
-## Stack
+    docker compose up --build
 
-**Backend:** Python, FastAPI, SQLAlchemy, Alembic, MySQL, Redis, Pytest  
-**Frontend:** React, TypeScript, Vite, CSS  
-**Infrastructure:** Docker Compose, GitHub Actions
+4. API: http://localhost:8000
+5. OpenAPI: http://localhost:8000/docs
+6. Start the frontend:
 
-## Local development
+    cd frontend
+    npm install
+    npm run dev
 
-Copy .env.example to .env and replace development secrets before using authenticated features.
+Optional:
 
-Start infrastructure:
+    VITE_API_URL=http://localhost:8000/api/v1
 
-docker compose up --build
+## Tests
 
-API: http://localhost:8000
+Backend:
 
-OpenAPI: http://localhost:8000/docs
-
-Backend tests:
-
-cd backend
-pip install -r requirements.txt
-pytest
+    cd backend
+    pip install -r requirements.txt
+    pytest -q
 
 Frontend:
 
-cd frontend
-npm install
-npm run dev
+    cd frontend
+    npm install
+    npm run build
 
-## Engineering principles
+## Engineering decisions
 
-- Business rules stay outside HTTP handlers.
-- Money, prices, and quantities use fixed-point decimals.
-- Financial mutations use explicit database transaction boundaries.
-- Account balances are treated as the source of truth for spendable funds.
-- Trades are the source of truth for executions.
-- Transactions form an auditable ledger.
-- Secrets are never committed.
-- Tests are required before a feature is considered complete.
+- Money, price and quantity use fixed-point DECIMAL values.
+- Account rows are locked during financial mutations.
+- Every order POST requires Idempotency-Key.
+- Refresh tokens are stored only as SHA-256 hashes.
+- Passwords use Argon2id through pwdlib.
+- Business rules live in application services.
+- Redis failures do not make financial writes authoritative.
+- This project is paper trading and must not be presented as a real-money exchange.
+
+See docs/ for architecture, database, API and development notes.

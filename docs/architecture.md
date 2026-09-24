@@ -2,25 +2,25 @@
 
 TradeFlow is a modular monolith for the MVP.
 
-React/TypeScript frontend
-→ FastAPI REST API
-→ application services
-→ SQLAlchemy
-→ MySQL
+React/TypeScript
+  -> FastAPI REST API
+  -> application services
+  -> SQLAlchemy
+  -> MySQL
+  -> Redis for cache and rate limiting
 
-Redis is used selectively for market-data caching and rate limiting.
+## Financial invariants
 
-## Principles
-
-1. Business rules live in services, not HTTP handlers.
-2. Financial operations have explicit database transaction boundaries.
-3. Accounts are the source of truth for spendable balances.
-4. Trades are the source of truth for executions.
-5. Transactions provide an auditable financial ledger.
-6. Portfolio snapshots are historical read models.
-7. External market data is accessed through a provider boundary.
-8. Distributed systems are intentionally out of scope for the MVP.
+1. Available plus locked balance equals total balance for an asset.
+2. Spendable funds are reduced before an order can execute.
+3. Account rows are locked during order mutations.
+4. Trades record executions.
+5. Transactions record balance mutations.
+6. Redis is never authoritative for financial state.
+7. Decimal fixed-point values are used for money, price and quantity.
 
 ## Order flow
 
-Request → authentication → validation → order service → account row lock → balance check/reservation → order creation → execution when applicable → ledger entries → commit.
+Authenticate -> validate -> idempotency check -> lock account -> validate balance -> reserve -> create order -> execute when applicable -> ledger/trade records -> commit.
+
+The MVP uses deterministic paper prices rather than a full exchange matching engine.
