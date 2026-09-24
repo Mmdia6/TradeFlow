@@ -1,37 +1,78 @@
 # TradeFlow
 
-Crypto Trading & Portfolio Platform for realistic paper trading.
+TradeFlow is a full-stack paper-trading and portfolio management platform built as a portfolio-grade engineering project.
 
-TradeFlow is a full-stack portfolio project focused on backend engineering, transactional consistency, authentication, market-data caching, portfolio accounting, testing, and production-oriented development practices.
+> **Scope:** TradeFlow does not execute real-money trades or custody user funds.
 
-## Status
+## Current status
 
-🚧 Active development — MVP foundation.
+**Active development — foundation and database layer implemented.**
 
-## Planned Stack
+The repository currently contains:
 
-- Backend: Python, FastAPI, SQLAlchemy, Alembic
-- Database: MySQL
-- Cache / rate limiting: Redis
-- Frontend: React, TypeScript
-- Testing: pytest
-- Infrastructure: Docker Compose
+- FastAPI backend foundation
+- MySQL + SQLAlchemy + Alembic database layer
+- Redis service in local Docker Compose
+- JWT/password-security primitives
+- Initial database models and migration
+- React + TypeScript + Vite frontend foundation
+- Pytest coverage for health and password hashing
+- GitHub Actions CI for backend and frontend builds
+- Architecture and API documentation
 
-## Core Scope
+Trading execution, market-data providers, portfolio accounting, refresh-token rotation, rate limiting, and the production dashboard are being implemented in subsequent phases.
 
-- JWT authentication with refresh-token rotation
-- Spot paper trading
-- Market and limit orders
-- Balance reservation and release
-- Trade execution records
-- Transaction ledger
-- Portfolio and PnL calculations
-- Market-data caching
-- API rate limiting
-- Automated tests
+## Architecture
 
-TradeFlow does not execute real-money trades.
+React/TypeScript frontend → FastAPI API → service layer → SQLAlchemy → MySQL
 
-## Development
+Redis is reserved for cache/rate-limiting concerns. Financial state is persisted in MySQL using fixed-point DECIMAL values and transactional updates.
 
-Architecture and API decisions are documented under docs/. The application is being built incrementally, with each phase remaining runnable and tested before the next phase.
+See:
+
+- docs/architecture.md
+- docs/database.md
+- docs/order-state-machine.md
+- docs/api.md
+- docs/development.md
+
+## Stack
+
+**Backend:** Python, FastAPI, SQLAlchemy, Alembic, MySQL, Redis, Pytest  
+**Frontend:** React, TypeScript, Vite, CSS  
+**Infrastructure:** Docker Compose, GitHub Actions
+
+## Local development
+
+Copy .env.example to .env and replace development secrets before using authenticated features.
+
+Start infrastructure:
+
+docker compose up --build
+
+API: http://localhost:8000
+
+OpenAPI: http://localhost:8000/docs
+
+Backend tests:
+
+cd backend
+pip install -r requirements.txt
+pytest
+
+Frontend:
+
+cd frontend
+npm install
+npm run dev
+
+## Engineering principles
+
+- Business rules stay outside HTTP handlers.
+- Money, prices, and quantities use fixed-point decimals.
+- Financial mutations use explicit database transaction boundaries.
+- Account balances are treated as the source of truth for spendable funds.
+- Trades are the source of truth for executions.
+- Transactions form an auditable ledger.
+- Secrets are never committed.
+- Tests are required before a feature is considered complete.
