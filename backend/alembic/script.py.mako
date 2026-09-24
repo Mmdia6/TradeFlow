@@ -1,16 +1,13 @@
-"""Migration template."""
-
+"""Revision ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+"""
 from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
-
-revision: str = "REVISION_ID"
-down_revision: Union[str, Sequence[str], None] = "DOWN_REVISION"
-branch_labels = None
-depends_on = None
-
-def upgrade() -> None:
-    pass
-
-def downgrade() -> None:
-    pass
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+def upgrade(): pass
+def downgrade(): pass
